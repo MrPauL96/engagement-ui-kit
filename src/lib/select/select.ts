@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  afterRenderEffect,
   computed,
   forwardRef,
   inject,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { SelectOption } from './select-option';
@@ -31,16 +33,19 @@ export const Key = {
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => Select), multi: true }],
 })
 export class Select implements ControlValueAccessor {
+  private static count = 0;
+
   readonly label = input.required<string>();
   readonly options = input.required<readonly SelectOption[]>();
   readonly placeholder = input('Select an option');
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly listbox = viewChild<ElementRef<HTMLUListElement>>('listbox');
 
-  private readonly uid = Math.random().toString(36).slice(2, 9);
+  private readonly uid = `cw-select-${++Select.count}`;
 
-  protected readonly labelId = `cw-select-${this.uid}-label`;
-  protected readonly listboxId = `cw-select-${this.uid}-listbox`;
+  protected readonly labelId = `${this.uid}-label`;
+  protected readonly listboxId = `${this.uid}-listbox`;
 
   private readonly selectedValue = signal<string | null>(null);
   protected readonly disabled = signal(false);
@@ -62,8 +67,12 @@ export class Select implements ControlValueAccessor {
     return index < 0 ? null : this.optionId(index);
   });
 
-  writeValue(value: string | null): void {
-    this.selectedValue.set(value);
+  constructor() {
+    afterRenderEffect(() => this.scrollActiveOptionIntoView());
+  }
+
+  writeValue(value: string | null | undefined): void {
+    this.selectedValue.set(value ?? null);
   }
 
   registerOnChange(fn: (value: string | null) => void): void {
@@ -79,14 +88,17 @@ export class Select implements ControlValueAccessor {
   }
 
   protected optionId(index: number): string {
-    return `cw-select-${this.uid}-option-${index}`;
+    return `${this.uid}-option-${index}`;
   }
 
   protected selectOption(option: SelectOption): void {
     if (option.disabled) return;
 
-    this.selectedValue.set(option.value);
-    this.onChange(option.value);
+    if (this.selectedValue() !== option.value) {
+      this.selectedValue.set(option.value);
+      this.onChange(option.value);
+    }
+
     this.close();
   }
 
@@ -183,5 +195,12 @@ export class Select implements ControlValueAccessor {
   private selectActiveOption(): void {
     const option = this.options()[this.activeIndex()];
     if (option) this.selectOption(option);
+  }
+
+  private scrollActiveOptionIntoView(): void {
+    const index = this.activeIndex();
+    const listbox = this.listbox()?.nativeElement;
+
+    listbox?.children.item(index)?.scrollIntoView({ block: 'nearest' });
   }
 }
