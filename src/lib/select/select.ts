@@ -24,6 +24,15 @@ export const Key = {
   Escape: 'Escape',
 } as const;
 
+/**
+ * Picks one option from a list, following the WAI-ARIA select-only combobox
+ * pattern. Registers as a form control, so it works with `formControlName`.
+ *
+ * Usage:
+ * ```html
+ * <cw-select label="Reviewer" [options]="reviewers" [formControl]="reviewerId" />
+ * ```
+ */
 @Component({
   selector: 'cw-select',
   templateUrl: './select.html',
@@ -35,25 +44,32 @@ export const Key = {
 export class Select implements ControlValueAccessor {
   private static count = 0;
 
-  readonly label = input.required<string>();
-  readonly options = input.required<readonly SelectOption[]>();
-  readonly placeholder = input('Select an option');
+  readonly label = input.required<string>(); // required: the control has no other accessible name
+  readonly options = input.required<readonly SelectOption[]>(); // values must be unique: they identify an option
+  readonly placeholder = input('Select an option'); // shown in the trigger while nothing is selected
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly listbox = viewChild<ElementRef<HTMLUListElement>>('listbox');
 
-  private readonly uid = `cw-select-${++Select.count}`;
+  private readonly uid = Select.nextUid();
 
   protected readonly labelId = `${this.uid}-label`;
   protected readonly listboxId = `${this.uid}-listbox`;
 
-  private readonly selectedValue = signal<string | null>(null);
+  protected readonly selectedValue = signal<string | null>(null);
   protected readonly disabled = signal(false);
   protected readonly expanded = signal(false);
-  protected readonly activeIndex = signal(-1);
+  private readonly navigatedValue = signal<string | null>(null);
 
-  private onChange: (value: string | null) => void = () => {};
-  private onTouched: () => void = () => {};
+  protected readonly activeIndex = computed(() => {
+    const navigatedValue = this.navigatedValue();
+    if (navigatedValue === null) return -1;
+
+    const index = this.options().findIndex((item) => item.value === navigatedValue);
+    if (index > -1) return index;
+
+    return this.options().length === 0 ? -1 : 0;
+  });
 
   protected readonly selectedLabel = computed(() => {
     const selectedValue = this.selectedValue();
@@ -66,6 +82,9 @@ export class Select implements ControlValueAccessor {
 
     return index < 0 ? null : this.optionId(index);
   });
+
+  private onChange: (value: string | null) => void = () => {};
+  private onTouched: () => void = () => {};
 
   constructor() {
     afterRenderEffect(() => this.scrollActiveOptionIntoView());
@@ -85,10 +104,20 @@ export class Select implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled.set(isDisabled);
+
+    if (isDisabled) this.close();
   }
 
   protected optionId(index: number): string {
     return `${this.uid}-option-${index}`;
+  }
+
+  protected optionLabelId(index: number): string {
+    return `${this.optionId(index)}-label`;
+  }
+
+  protected optionDescriptionId(index: number): string {
+    return `${this.optionId(index)}-description`;
   }
 
   protected selectOption(option: SelectOption): void {
@@ -169,23 +198,25 @@ export class Select implements ControlValueAccessor {
   }
 
   private open(): void {
+    const options = this.options();
     const selectedValue = this.selectedValue();
-    const selectedIndex = this.options().findIndex((item) => item.value === selectedValue);
+    const isStillOffered = options.some((item) => item.value === selectedValue);
 
-    this.activeIndex.set(this.options().length === 0 ? -1 : Math.max(selectedIndex, 0));
+    this.navigatedValue.set(isStillOffered ? selectedValue : (options[0]?.value ?? null));
     this.expanded.set(true);
   }
 
   private close(): void {
     this.expanded.set(false);
-    this.activeIndex.set(-1);
+    this.navigatedValue.set(null);
   }
 
   private moveTo(index: number): void {
-    const lastIndex = this.options().length - 1;
+    const options = this.options();
+    const lastIndex = options.length - 1;
     if (lastIndex < 0) return;
 
-    this.activeIndex.set(Math.min(Math.max(index, 0), lastIndex));
+    this.navigatedValue.set(options[Math.min(Math.max(index, 0), lastIndex)].value);
   }
 
   private moveBy(delta: number): void {
@@ -195,6 +226,12 @@ export class Select implements ControlValueAccessor {
   private selectActiveOption(): void {
     const option = this.options()[this.activeIndex()];
     if (option) this.selectOption(option);
+  }
+
+  private static nextUid(): string {
+    Select.count += 1;
+
+    return `cw-select-${Select.count}`;
   }
 
   private scrollActiveOptionIntoView(): void {

@@ -38,13 +38,17 @@
           [id]="optionId(i)"
           [class.cw-select__option--active]="i === activeIndex()"
           [class.cw-select__option--disabled]="option.disabled"
-          [attr.aria-selected]="i === activeIndex() ? 'true' : null"
+          [attr.aria-selected]="option.value === selectedValue()"
           [attr.aria-disabled]="option.disabled ? 'true' : null"
+          [attr.aria-labelledby]="optionLabelId(i)"
+          [attr.aria-describedby]="option.description ? optionDescriptionId(i) : null"
           (click)="selectOption(option)"
         >
-          <span class="cw-select__option-label">{{ option.label }}</span>
+          <span class="cw-select__option-label" [id]="optionLabelId(i)">{{ option.label }}</span>
           @if (option.description) {
-            <span class="cw-select__option-description">{{ option.description }}</span>
+            <span class="cw-select__option-description" [id]="optionDescriptionId(i)">
+              {{ option.description }}
+            </span>
           }
         </li>
       }
