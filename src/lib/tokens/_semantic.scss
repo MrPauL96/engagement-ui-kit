@@ -29,6 +29,11 @@
   --cw-border-strong: var(--cw-gray-300);
   --cw-border-focus: var(--cw-blue-600);
 
+  /* Status. Amber is the 700, not the 600: the 600 only reaches 2.95:1 here. */
+  --cw-status-ready: var(--cw-green-600);
+  --cw-status-processing: var(--cw-amber-700);
+  --cw-status-error: var(--cw-red-600);
+
   /* Shape */
   --cw-radius-control: var(--cw-radius-md);
 
@@ -57,4 +62,10 @@
   --cw-border-default: var(--cw-gray-400);
   --cw-border-strong: var(--cw-gray-300);
   --cw-border-focus: var(--cw-blue-200);
+
+  /* Status: the 600s drop under 3:1 on a dark surface and the 100s wash the
+     hue out, so these use the mid-tones added to the primitives. */
+  --cw-status-ready: var(--cw-green-400);
+  --cw-status-processing: var(--cw-amber-400);
+  --cw-status-error: var(--cw-red-400);
 }

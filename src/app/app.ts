@@ -1,7 +1,24 @@
 import { Component, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Select, StatusBadge, type SelectOption } from '../lib/public-api';
-import { CHANGE_GROUPS, ENGAGEMENTS, REVIEWERS } from './data/engagement-fixtures';
+import { Select, StatusBadge, type SelectOption, type StatusBadgeStatus } from '../lib/public-api';
+import {
+  CHANGE_GROUPS,
+  ENGAGEMENTS,
+  REVIEWERS,
+  type EngagementStatus,
+} from './data/engagement-fixtures';
+
+/**
+ * The audit domain's status codes, translated into the kit's vocabulary.
+ *
+ * The label is part of the translation now that the badge exposes it: screen
+ * readers spell all-caps tokens out letter by letter.
+ */
+const BADGE: Record<EngagementStatus, { status: StatusBadgeStatus; label: string }> = {
+  READY: { status: 'ready', label: 'Ready' },
+  PROCESSING: { status: 'processing', label: 'Processing' },
+  ERROR: { status: 'error', label: 'Error' },
+};
 
 /**
  * The workbench: a consumer of the kit in `src/lib`.
@@ -22,7 +39,10 @@ import { CHANGE_GROUPS, ENGAGEMENTS, REVIEWERS } from './data/engagement-fixture
 export class App {
   protected readonly theme = signal<'light' | 'dark'>('light');
 
-  protected readonly engagements = ENGAGEMENTS;
+  protected readonly engagements = ENGAGEMENTS.map((engagement) => ({
+    ...engagement,
+    badge: BADGE[engagement.status],
+  }));
   protected readonly reviewers = REVIEWERS;
   protected readonly changeGroups = CHANGE_GROUPS;
 

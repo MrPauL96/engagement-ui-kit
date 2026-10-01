@@ -1,44 +1,25 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+export type StatusBadgeStatus = 'ready' | 'processing' | 'error';
+export type StatusBadgeSize = 'sm' | 'md' | 'lg';
 
 /**
  * Shows the processing state of an engagement.
  *
  * Usage:
  * ```html
- * <cw-status-badge label="Ready" [isReady]="true"></cw-status-badge>
+ * <cw-status-badge status="ready" label="Ready" />
  * ```
  */
 @Component({
   selector: 'cw-status-badge',
   templateUrl: './status-badge.html',
   styleUrl: './status-badge.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatusBadge {
-  @Input() label = '';
-  @Input() isReady = false;
-  @Input() isProcessing = false;
-  @Input() isError = false;
-  @Input() isSmall = false;
-  @Input() isLarge = false;
-  @Input() tooltip = '';
-
-  get cssClass(): string {
-    let css = 'badge';
-    if (this.isReady) {
-      css += ' badge-ready';
-    }
-    if (this.isProcessing) {
-      css += ' badge-processing';
-    }
-    if (this.isError) {
-      css += ' badge-error';
-    }
-    if (this.isSmall) {
-      css += ' badge-sm';
-    }
-    if (this.isLarge) {
-      css += ' badge-lg';
-    }
-    return css;
-  }
+  readonly status = input.required<StatusBadgeStatus>(); // drives the dot colour only; the label carries the meaning
+  readonly label = input.required<string>(); // visible and announced. avoid all caps: readers spell those out
+  readonly size = input<StatusBadgeSize>('md'); // scales text and padding; the dot follows in em
+  readonly tooltip = input<string>(); // native title: not reachable by keyboard or touch, so never put meaning here
 }

@@ -25,15 +25,15 @@
     <p class="wb-note">The supplied component, in the states the engagement list needs.</p>
 
     <div class="wb-specimens">
-      <cw-status-badge label="Ready" [isReady]="true"></cw-status-badge>
+      <cw-status-badge status="ready" label="Ready" />
       <cw-status-badge
+        status="processing"
         label="Processing"
-        [isProcessing]="true"
         tooltip="The server is still preparing this engagement"
-      ></cw-status-badge>
-      <cw-status-badge label="Error" [isError]="true"></cw-status-badge>
-      <cw-status-badge label="Ready" [isReady]="true" [isSmall]="true"></cw-status-badge>
-      <cw-status-badge label="Ready" [isReady]="true" [isLarge]="true"></cw-status-badge>
+      />
+      <cw-status-badge status="error" label="Error" />
+      <cw-status-badge status="ready" label="Ready" size="sm" />
+      <cw-status-badge status="ready" label="Ready" size="lg" />
     </div>
   </section>
 
@@ -51,12 +51,7 @@
 
           <span class="engagement-pending"> {{ engagement.pendingChangeCount }} pending </span>
 
-          <cw-status-badge
-            [label]="engagement.status"
-            [isReady]="engagement.status === 'READY'"
-            [isProcessing]="engagement.status === 'PROCESSING'"
-            [isError]="engagement.status === 'ERROR'"
-          ></cw-status-badge>
+          <cw-status-badge [status]="engagement.badge.status" [label]="engagement.badge.label" />
         </li>
       }
     </ul>
