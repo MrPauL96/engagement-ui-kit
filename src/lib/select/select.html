@@ -1,0 +1,52 @@
+<span class="cw-select__label" [id]="labelId">{{ label() }}</span>
+
+<div class="cw-select">
+  <div
+    class="cw-select__input"
+    role="combobox"
+    tabindex="0"
+    aria-haspopup="listbox"
+    [attr.aria-labelledby]="labelId"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="expanded() ? listboxId : null"
+    [attr.aria-activedescendant]="activeDescendantId()"
+    [attr.aria-disabled]="disabled() ? 'true' : null"
+    (click)="toggle()"
+    (keydown)="onKeydown($event)"
+  >
+    @if (selectedLabel(); as selected) {
+      <span class="cw-select__value">{{ selected }}</span>
+    } @else {
+      <span class="cw-select__value cw-select__value--empty">{{ placeholder() }}</span>
+    }
+  </div>
+
+  @if (expanded()) {
+    <ul
+      class="cw-select__listbox"
+      role="listbox"
+      tabindex="-1"
+      [id]="listboxId"
+      [attr.aria-labelledby]="labelId"
+      (mousedown)="$event.preventDefault()"
+    >
+      @for (option of options(); track option.value; let i = $index) {
+        <li
+          class="cw-select__option"
+          role="option"
+          [id]="optionId(i)"
+          [class.cw-select__option--active]="i === activeIndex()"
+          [class.cw-select__option--disabled]="option.disabled"
+          [attr.aria-selected]="i === activeIndex() ? 'true' : null"
+          [attr.aria-disabled]="option.disabled ? 'true' : null"
+          (click)="selectOption(option)"
+        >
+          <span class="cw-select__option-label">{{ option.label }}</span>
+          @if (option.description) {
+            <span class="cw-select__option-description">{{ option.description }}</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>
