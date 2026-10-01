@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-
-import { StatusBadge } from '../lib/public-api';
+import { Select, StatusBadge, type SelectOption } from '../lib/public-api';
 import { CHANGE_GROUPS, ENGAGEMENTS, REVIEWERS } from './data/engagement-fixtures';
 
 /**
@@ -12,7 +11,7 @@ import { CHANGE_GROUPS, ENGAGEMENTS, REVIEWERS } from './data/engagement-fixture
  */
 @Component({
   selector: 'app-root',
-  imports: [ReactiveFormsModule, StatusBadge],
+  imports: [ReactiveFormsModule, StatusBadge, Select],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -23,4 +22,11 @@ export class App {
 
   /** A form control for the reviewer filter, ready for a form-integrated control. */
   protected readonly reviewerId = new FormControl<string | null>(null);
+
+  protected readonly reviewerOptions: readonly SelectOption[] = REVIEWERS.map((reviewer) => ({
+    value: reviewer.id,
+    label: reviewer.name,
+    description: reviewer.role,
+    disabled: reviewer.unavailable,
+  }));
 }

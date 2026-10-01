@@ -55,13 +55,7 @@
       form-integrated component can be dropped straight in.
     </p>
 
-    <div class="wb-placeholder">
-      <p>No reviewer picker yet.</p>
-      <p class="wb-note">
-        {{ reviewers.length }} reviewers and {{ changeGroups.length }} change groups are available
-        in <code>src/app/data/engagement-fixtures.ts</code>.
-      </p>
-    </div>
+    <cw-select [formControl]="reviewerId" label="Reviewer" [options]="reviewerOptions" />
 
     <dl class="wb-state">
       <dt>value</dt>
