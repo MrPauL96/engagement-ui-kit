@@ -32,7 +32,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--cw-focus-ring);
+      outline: 2px solid var(--cw-border-focus);
       outline-offset: 2px;
     }
 
@@ -68,7 +68,7 @@
     padding: var(--cw-space-1);
     overflow-y: auto;
     list-style: none;
-    background: var(--cw-surface-raised);
+    background: var(--cw-surface-elevated);
     border: 1px solid var(--cw-border-default);
     border-radius: var(--cw-radius-control);
     box-shadow: var(--cw-shadow-md);
@@ -107,9 +107,6 @@
       }
     }
 
-    &--active#{&}--disabled {
-      color: var(--cw-text-on-active-muted);
-    }
   }
 
   &__option-label,
@@ -129,4 +126,8 @@
     font-size: var(--cw-font-size-sm);
     color: var(--cw-text-muted);
   }
+}
+
+.cw-select__option--active.cw-select__option--disabled {
+  color: var(--cw-text-on-active-muted);
 }

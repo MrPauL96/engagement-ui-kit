@@ -2,13 +2,18 @@
  * Semantic tokens: what a value is *for*.
  *
  * Components consume this layer only. A theme overrides this file's values
- * without touching the primitives or any component.
+ * without touching the primitives or any component. A theme block therefore
+ * contains token declarations and nothing else: no component selectors.
  */
 
-:root {
+:root,
+.cw-theme-light {
+  color-scheme: light;
+
   /* Surfaces */
   --cw-surface-default: var(--cw-gray-0);
-  --cw-surface-raised: var(--cw-gray-0);
+  --cw-surface-subtle: var(--cw-gray-50);
+  --cw-surface-elevated: var(--cw-gray-0);
   --cw-surface-hover: var(--cw-gray-50);
   --cw-surface-active: var(--cw-blue-600);
 
@@ -22,13 +27,34 @@
   /* Borders */
   --cw-border-default: var(--cw-gray-200);
   --cw-border-strong: var(--cw-gray-300);
-
-  /* Focus */
-  --cw-focus-ring: var(--cw-blue-600);
+  --cw-border-focus: var(--cw-blue-600);
 
   /* Shape */
   --cw-radius-control: var(--cw-radius-md);
 
   /* Layering */
   --cw-layer-popup: var(--cw-z-popup);
+}
+
+.cw-theme-dark {
+  color-scheme: dark;
+
+  /* Surfaces: what floats is lighter, not shadowed. */
+  --cw-surface-default: var(--cw-gray-900);
+  --cw-surface-subtle: var(--cw-gray-800);
+  --cw-surface-elevated: var(--cw-gray-800);
+  --cw-surface-hover: var(--cw-gray-700);
+  --cw-surface-active: var(--cw-blue-200);
+
+  /* Text */
+  --cw-text-default: var(--cw-gray-50);
+  --cw-text-muted: var(--cw-gray-400);
+  --cw-text-disabled: var(--cw-gray-600);
+  --cw-text-on-active: var(--cw-gray-900);
+  --cw-text-on-active-muted: var(--cw-gray-700);
+
+  /* Borders */
+  --cw-border-default: var(--cw-gray-400);
+  --cw-border-strong: var(--cw-gray-300);
+  --cw-border-focus: var(--cw-blue-200);
 }
