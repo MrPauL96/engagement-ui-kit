@@ -1,10 +1,34 @@
 /**
- * Semantic tokens: what the primitives are *for*.
+ * Semantic tokens: what a value is *for*.
  *
- * This layer is yours. It is the seam between the raw palette in
- * `_primitives.scss` and the components that consume it, and it is what makes
- * a second theme possible without touching component styles.
- *
- * Nothing here is prescribed: the roles you define, how you name them, and how
- * a theme overrides them are part of what the exercise is asking you to design.
+ * Components consume this layer only. A theme overrides this file's values
+ * without touching the primitives or any component.
  */
+
+:root {
+  /* Surfaces */
+  --cw-surface-default: var(--cw-gray-0);
+  --cw-surface-raised: var(--cw-gray-0);
+  --cw-surface-hover: var(--cw-gray-50);
+  --cw-surface-active: var(--cw-blue-600);
+
+  /* Text */
+  --cw-text-default: var(--cw-gray-900);
+  --cw-text-muted: var(--cw-gray-500);
+  --cw-text-disabled: var(--cw-gray-400);
+  --cw-text-on-active: var(--cw-gray-0);
+  --cw-text-on-active-muted: var(--cw-blue-100);
+
+  /* Borders */
+  --cw-border-default: var(--cw-gray-200);
+  --cw-border-strong: var(--cw-gray-300);
+
+  /* Focus */
+  --cw-focus-ring: var(--cw-blue-600);
+
+  /* Shape */
+  --cw-radius-control: var(--cw-radius-md);
+
+  /* Layering */
+  --cw-layer-popup: var(--cw-z-popup);
+}

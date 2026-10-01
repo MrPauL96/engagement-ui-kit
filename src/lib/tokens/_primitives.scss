@@ -86,6 +86,10 @@
   --cw-shadow-sm: 0 1px 2px rgb(27 31 36 / 8%);
   --cw-shadow-md: 0 4px 12px rgb(27 31 36 / 12%);
 
+  /* Layering */
+  --cw-z-raised: 10;
+  --cw-z-popup: 100;
+
   /* Motion */
   --cw-duration-fast: 120ms;
   --cw-easing-standard: cubic-bezier(0.2, 0, 0.2, 1);
