@@ -10,7 +10,7 @@ import type { SelectOption } from './select-option';
  * promises, because both of them fail invisibly: the screen stays correct
  * while the screen reader goes wrong.
  *
- *   1. DOM focus never leaves the trigger.
+ *   1. DOM focus never leaves the combobox.
  *   2. `aria-activedescendant` names a rendered option while the listbox is
  *      open, and nothing once it closes.
  *
@@ -99,7 +99,7 @@ describe('Select', () => {
     scrollIntoView.mockClear();
   });
 
-  it('keeps focus on the trigger through every open, navigate and close path', async () => {
+  it('focus stays on the combobox whichever way the list is opened and closed', async () => {
     const { trigger, control, press, clickOption } = await setup();
 
     await press('ArrowDown');
@@ -118,9 +118,7 @@ describe('Select', () => {
     expect(control.value).toBe('zoe');
   });
 
-  it('prevents the listbox mousedown, which is what keeps a click from blurring the trigger', async () => {
-    // jsdom does not move focus on mousedown, so asserting that the trigger
-    // still has focus after a click would pass even without the preventDefault.
+  it('prevents the listbox mousedown, which is what keeps a click from blurring the combobox', async () => {
     const { fixture, press } = await setup();
 
     await press('ArrowDown');
@@ -160,6 +158,25 @@ describe('Select', () => {
     expect(trigger.getAttribute('aria-activedescendant')).toBe(options()[0].id);
   });
 
+  it('resolves aria-activedescendant at both ends of a list of several hundred options', async () => {
+    const many: SelectOption[] = Array.from({ length: 500 }, (_, i) => ({
+      value: `user-${i}`,
+      label: `Reviewer ${i}`,
+    }));
+
+    const { fixture, trigger, options, press } = await setup();
+
+    fixture.componentInstance.options.set(many);
+    await fixture.whenStable();
+
+    await press('End');
+    expect(options()).toHaveLength(500);
+    expect(trigger.getAttribute('aria-activedescendant')).toBe(options()[499].id);
+
+    await press('Home');
+    expect(trigger.getAttribute('aria-activedescendant')).toBe(options()[0].id);
+  });
+
   it('names each option after the reviewer, keeping the role as a separate description', async () => {
     const { fixture, options, press } = await setup();
 
@@ -184,6 +201,7 @@ describe('Select', () => {
     expect(scrollIntoView).toHaveBeenLastCalledWith({ block: 'nearest' });
   });
 
+  // the bug VoiceOver caught: every option announced as selected while the screen looked fine
   it('does not mark an option as selected just because the arrow keys reached it', async () => {
     const { control, options, option, press } = await setup();
 
@@ -249,6 +267,7 @@ describe('Select', () => {
     expect(trigger.getAttribute('aria-activedescendant')).toBe(options()[0].id);
   });
 
+  // the fixtures warn that other data may be used during review, so the list can shrink under us
   it('never points aria-activedescendant at an option removed while the listbox was open', async () => {
     const { fixture, press, expectAccessibleState } = await setup();
 
@@ -275,6 +294,7 @@ describe('Select', () => {
     expect(trigger.hasAttribute('aria-activedescendant')).toBe(false);
   });
 
+  // touched must not fire on open, and the workbench prints it, so that mistake shows up live
   it('closes and marks the control touched when focus leaves the component', async () => {
     const { fixture, trigger, control, isExpanded, press } = await setup();
 
