@@ -13,7 +13,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { SelectOption } from './select-option';
 
-export const Key = {
+const Key = {
   ArrowDown: 'ArrowDown',
   ArrowUp: 'ArrowUp',
   Home: 'Home',
@@ -42,8 +42,6 @@ export const Key = {
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => Select), multi: true }],
 })
 export class Select implements ControlValueAccessor {
-  private static count = 0;
-
   readonly label = input.required<string>(); // required: the control has no other accessible name
   readonly options = input.required<readonly SelectOption[]>(); // values must be unique: they identify an option
   readonly placeholder = input('Select an option'); // shown in the trigger while nothing is selected
@@ -63,12 +61,15 @@ export class Select implements ControlValueAccessor {
 
   protected readonly activeIndex = computed(() => {
     const navigatedValue = this.navigatedValue();
+    const options = this.options();
+
     if (navigatedValue === null) return -1;
 
-    const index = this.options().findIndex((item) => item.value === navigatedValue);
-    if (index > -1) return index;
+    const index = options.findIndex((item) => item.value === navigatedValue);
+    if (index !== -1) return index;
 
-    return this.options().length === 0 ? -1 : 0;
+    // the option was removed while the listbox was open
+    return options.length > 0 ? 0 : -1;
   });
 
   protected readonly selectedLabel = computed(() => {
@@ -85,6 +86,7 @@ export class Select implements ControlValueAccessor {
 
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
+  private static uidCounter = 0;
 
   constructor() {
     afterRenderEffect(() => this.scrollActiveOptionIntoView());
@@ -138,8 +140,9 @@ export class Select implements ControlValueAccessor {
     else this.open();
   }
 
+  // the listbox calls preventDefault on mousedown, so clicking an option never reaches here
   protected onFocusOut(event: FocusEvent): void {
-    const nextFocusedElement = event.relatedTarget as Node | null;
+    const nextFocusedElement = <Node | null> event.relatedTarget;
     if (nextFocusedElement && this.host.nativeElement.contains(nextFocusedElement)) return;
 
     this.close();
@@ -151,6 +154,7 @@ export class Select implements ControlValueAccessor {
 
     const isOpen = this.expanded();
 
+    // `break` reaches the preventDefault() below, `return` leaves the key to the browser
     switch (event.key) {
       case Key.ArrowDown:
         if (isOpen) this.moveBy(1);
@@ -200,9 +204,9 @@ export class Select implements ControlValueAccessor {
   private open(): void {
     const options = this.options();
     const selectedValue = this.selectedValue();
-    const isStillOffered = options.some((item) => item.value === selectedValue);
+    const validValue = options.find((item) => item.value === selectedValue)?.value;
 
-    this.navigatedValue.set(isStillOffered ? selectedValue : (options[0]?.value ?? null));
+    this.navigatedValue.set(validValue ?? options[0]?.value ?? null);
     this.expanded.set(true);
   }
 
@@ -216,7 +220,9 @@ export class Select implements ControlValueAccessor {
     const lastIndex = options.length - 1;
     if (lastIndex < 0) return;
 
-    this.navigatedValue.set(options[Math.min(Math.max(index, 0), lastIndex)].value);
+    const targetIndex = Math.min(Math.max(index, 0), lastIndex);
+
+    this.navigatedValue.set(options[targetIndex].value);
   }
 
   private moveBy(delta: number): void {
@@ -229,9 +235,9 @@ export class Select implements ControlValueAccessor {
   }
 
   private static nextUid(): string {
-    Select.count += 1;
+    Select.uidCounter += 1;
 
-    return `cw-select-${Select.count}`;
+    return `cw-select-${Select.uidCounter}`;
   }
 
   private scrollActiveOptionIntoView(): void {
