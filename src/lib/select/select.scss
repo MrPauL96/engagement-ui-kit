@@ -26,6 +26,7 @@
     font-size: var(--cw-font-size-md);
     line-height: var(--cw-line-height-normal);
     cursor: pointer;
+    user-select: none;
 
     &:hover {
       border-color: var(--cw-border-strong);
